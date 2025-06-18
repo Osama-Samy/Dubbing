@@ -145,8 +145,8 @@ class EnhancedVideoTranslator:
 
         file_size = os.path.getsize(video_path)
         if file_size > CONFIG["max_file_size"]:
-            raise VideoTranslatorError(f"File too large. Maximum size: {CONFIG[\'max_file_size\']/1024/1024:.1f}MB")
-
+            raise VideoTranslatorError(f"File too large. Maximum size: {CONFIG['max_file_size']/1024/1024:.1f}MB")
+            
         file_ext = Path(video_path).suffix.lower()
         if file_ext not in CONFIG["supported_formats"]:
             raise VideoTranslatorError(f"Unsupported format. Supported: {\', \'.join(CONFIG[\'supported_formats\'])}")
