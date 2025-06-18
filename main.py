@@ -34,7 +34,7 @@ import uuid
 warnings.filterwarnings("ignore", category=UserWarning, module="transformers")
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format=\'%(asctime)s - %(levelname)s - %(message)s\')
 logger = logging.getLogger(__name__)
 
 # Azure Speech Service credentials
@@ -43,7 +43,7 @@ AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "italynorth")
 
 # Enhanced Configuration
 CONFIG = {
-    "whisper_model": "medium",
+    "whisper_model": "tiny",
     "translation_model": "Helsinki-NLP/opus-mt-en-ar",
     "arabic_voice": "ar-SA-HamedNeural",
     "max_segment_gap": 0.5,
@@ -145,11 +145,11 @@ class EnhancedVideoTranslator:
 
         file_size = os.path.getsize(video_path)
         if file_size > CONFIG["max_file_size"]:
-            raise VideoTranslatorError(f"File too large. Maximum size: {CONFIG['max_file_size']/1024/1024:.1f}MB")
+            raise VideoTranslatorError(f"File too large. Maximum size: {CONFIG[\'max_file_size\']/1024/1024:.1f}MB")
 
         file_ext = Path(video_path).suffix.lower()
         if file_ext not in CONFIG["supported_formats"]:
-            raise VideoTranslatorError(f"Unsupported format. Supported: {', '.join(CONFIG['supported_formats'])}")
+            raise VideoTranslatorError(f"Unsupported format. Supported: {\', \'.join(CONFIG[\'supported_formats\'])}")
 
         return True
 
@@ -175,7 +175,7 @@ class EnhancedVideoTranslator:
 
                 video.audio.write_audiofile(
                     full_audio_path,
-                    codec='pcm_s16le',
+                    codec=\'pcm_s16le\',
                     verbose=False,
                     logger=None
                 )
@@ -241,7 +241,7 @@ class EnhancedVideoTranslator:
                     "start": segment["start"],
                     "end": segment["end"],
                     "text": segment["text"].strip(),
-                    "confidence": getattr(segment, 'confidence', 0.9)
+                    "confidence": getattr(segment, \'confidence\', 0.9)
                 })
 
             logger.info(f"Transcription completed. Found {len(segments)} segments")
@@ -446,7 +446,7 @@ async def dub_video(background_tasks: BackgroundTasks, file: UploadFile = File(.
     if not file.filename.lower().endswith(tuple(CONFIG["supported_formats"])):
         raise HTTPException(
             status_code=400, 
-            detail=f"Unsupported file format. Supported: {', '.join(CONFIG['supported_formats'])}"
+            detail=f"Unsupported file format. Supported: {\', \'.join(CONFIG[\'supported_formats\'])}"
         )
     
     # حفظ الملف المرفوع
@@ -501,4 +501,3 @@ if __name__ == "__main__":
         reload=False,
         log_level="info"
     )
-
