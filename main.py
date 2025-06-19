@@ -33,7 +33,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="transformers")
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 # Azure Speech Service credentials
 AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "FMJPLiTea92XmK7ZNqv3CscieRTdQNU5ihZ26RFUrHACpxPKTLiMJQQJ99BFACgEuAYXJ3w3AAAYACOGCMRL")
@@ -95,7 +95,7 @@ class VideoTranslatorError(Exception):
     pass
 
 class EnhancedVideoTranslator:
-    def _init_(self):
+    def __init__(self):
         self.temp_dir = None
         self.whisper_model = None
         self.translation_model = None
@@ -238,7 +238,7 @@ def cleanup_files(*file_paths):
         except Exception as e:
             logger.warning(f"Failed to cleanup file {file_path}: {str(e)}")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app",
