@@ -59,7 +59,7 @@ class VideoTranslatorError(Exception):
     pass
 
 class EnhancedVideoTranslator:
-    def _init_(self):
+    def __init__(self):
         self.temp_dir = tempfile.mkdtemp()
         device = "cuda" if torch.cuda.is_available() else "cpu"
         self.whisper_model = whisper.load_model(CONFIG["whisper_model"], device=device)
