@@ -28,20 +28,16 @@ import uuid
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-# تجاهل التحذيرات غير المهمة
 warnings.filterwarnings("ignore", category=UserWarning, module="transformers")
 
-# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Azure Speech Service credentials
-AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "FMJPLiTea92XmK7ZNqv3CscieRTdQNU5ihZ26RFUrHACpxPKTLiMJQQJ99BFACgEuAYXJ3w3AAAYACOGCMRL")
+AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "YOUR_KEY_HERE")
 AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "italynorth")
 
-# Enhanced Configuration
 CONFIG = {
-    "whisper_model": "medium",  
+    "whisper_model": "medium",
     "translation_model": "Helsinki-NLP/opus-mt-en-ar",
     "arabic_voice": "ar-SA-HamedNeural",
     "max_segment_gap": 0.5,
@@ -51,33 +47,17 @@ CONFIG = {
     "max_file_size": 500 * 1024 * 1024,
     "supported_formats": [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv"],
     "temp_cleanup": True,
-    "vocal_isolation_strength": 0.9,
-    "noise_reduction_strength": 0.4,
-    "voice_enhancement": True,
-    "preserve_effects": True,
-    "audio_normalization": True,
-    "dynamic_range_compression": 0.8,
     "sample_rate": 22050,
     "hop_length": 512,
     "n_fft": 2048,
-    "preserve_audio_length": True,
-    "stft_center": True,
-    "audio_padding_mode": "reflect",
-    "length_tolerance": 1024,
-    "translation_confidence_threshold": -0.8,
-    "audio_sync_tolerance": 0.1,
-    "voice_clone_quality": "high",
-    "background_reduction_factor": 0.15
 }
 
-# Initialize FastAPI app
 app = FastAPI(
     title="Video Dubbing API",
     description="API لدبلجة الفيديوهات من الإنجليزية إلى العربية",
     version="1.0.0"
 )
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -86,12 +66,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global variables for models
 translator = None
 executor = ThreadPoolExecutor(max_workers=2)
 
 class VideoTranslatorError(Exception):
-    """Custom exception for video translator errors"""
     pass
 
 class EnhancedVideoTranslator:
@@ -104,98 +82,87 @@ class EnhancedVideoTranslator:
         self.setup_models()
 
     def setup_models(self):
-        """Initialize all models with error handling"""
         try:
             self.temp_dir = tempfile.mkdtemp()
-            logger.info(f"Created temporary directory: {self.temp_dir}")
+            logger.info(f"📁 Temporary directory created: {self.temp_dir}")
 
-            # Load Whisper model
-            logger.info("Loading Whisper model...")
             device = "cuda" if torch.cuda.is_available() else "cpu"
+            logger.info(f"⚙️ Loading Whisper model on {device}...")
             self.whisper_model = whisper.load_model(CONFIG["whisper_model"], device=device)
-            logger.info(f"Whisper model loaded on {device}")
+            logger.info("✅ Whisper model loaded.")
 
-            # Load translation model
-            logger.info("Loading translation model...")
+            logger.info("⚙️ Loading translation model...")
             self.translation_model = MarianMTModel.from_pretrained(CONFIG["translation_model"])
             self.tokenizer = MarianTokenizer.from_pretrained(CONFIG["translation_model"])
-            logger.info("Translation model loaded successfully")
+            logger.info("✅ Translation model loaded.")
 
-            # Initialize Voice Activity Detection
             try:
                 self.vad = webrtcvad.Vad(2)
-                logger.info("Voice Activity Detection initialized")
+                logger.info("✅ VAD initialized.")
             except:
-                logger.warning("Could not initialize WebRTC VAD, using fallback method")
+                logger.warning("⚠️ WebRTC VAD initialization failed.")
                 self.vad = None
 
         except Exception as e:
-            logger.error(f"Failed to initialize models: {str(e)}")
-            raise VideoTranslatorError(f"Model initialization failed: {str(e)}")
+            logger.error(f"❌ Model initialization failed: {str(e)}")
+            raise VideoTranslatorError(f"Model init error: {str(e)}")
 
     def validate_input(self, video_path: str) -> bool:
-        """Validate input video file"""
-        if not video_path:
-            raise VideoTranslatorError("No video file provided")
-
         if not os.path.isfile(video_path):
-            raise VideoTranslatorError("Video file does not exist")
+            raise VideoTranslatorError("File does not exist.")
 
-        file_size = os.path.getsize(video_path)
-        if file_size > CONFIG["max_file_size"]:
-            raise VideoTranslatorError(f"File too large. Maximum size: {CONFIG['max_file_size']/1024/1024:.1f}MB")
+        size = os.path.getsize(video_path)
+        if size > CONFIG["max_file_size"]:
+            raise VideoTranslatorError("File too large.")
 
-        file_ext = Path(video_path).suffix.lower()
-        if file_ext not in CONFIG["supported_formats"]:
-            raise VideoTranslatorError(f"Unsupported format. Supported: {', '.join(CONFIG['supported_formats'])}")
+        if Path(video_path).suffix.lower() not in CONFIG["supported_formats"]:
+            raise VideoTranslatorError("Unsupported video format.")
 
         return True
 
-    # (The rest of the methods such as audio separation, transcription, etc. will be the same as in your original code)
+    def process_video(self, video_path: str) -> str:
+        # ⚠️ Placeholder: this function should include your actual processing logic
+        output_path = f"/tmp/{uuid.uuid4().hex}_dubbed.mp4"
+        shutil.copy(video_path, output_path)
+        logger.info(f"📽️ Processed video saved at {output_path}")
+        return output_path
 
-# Initialize translator on startup
 @app.on_event("startup")
 async def startup_event():
     global translator
     try:
         translator = EnhancedVideoTranslator()
-        logger.info("Video translator initialized successfully")
+        logger.info("✅ Translator initialized successfully. Server is ready to receive requests.")
     except Exception as e:
-        logger.error(f"Failed to initialize translator: {str(e)}")
+        logger.error(f"❌ Failed to initialize translator: {str(e)}")
         raise
 
 @app.get("/")
 async def root():
-    """نقطة البداية للـ API"""
     return {
-        "message": "مرحباً بك في API دبلجة الفيديوهات",
+        "message": "🎬 API دبلجة الفيديوهات جاهزة للعمل!",
         "version": "1.0.0",
-        "description": "API لدبلجة الفيديوهات من الإنجليزية إلى العربية"
+        "status": "✅ الموديلات محمّلة" if translator else "❌ جاري تحميل الموديلات"
     }
 
 @app.get("/health")
 async def health_check():
-    """فحص صحة الخدمة"""
+    status = "✅ جاهز" if translator else "❌ غير جاهز"
     return {
-        "status": "healthy",
+        "status": status,
         "timestamp": datetime.now().isoformat(),
-        "models_loaded": translator is not None
+        "models_loaded": translator is not None,
+        "message": "السيرفر يعمل والموديلات محمّلة" if translator else "الموديلات لم تُحمّل بعد"
     }
 
 @app.post("/dub-video")
 async def dub_video(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
-    """دبلجة فيديو من الإنجليزية إلى العربية"""
     if not translator:
         raise HTTPException(status_code=503, detail="Translator not initialized")
     
-    # التحقق من نوع الملف
     if not file.filename.lower().endswith(tuple(CONFIG["supported_formats"])):
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Unsupported file format. Supported: {', '.join(CONFIG['supported_formats'])}"
-        )
+        raise HTTPException(status_code=400, detail="Unsupported video format.")
     
-    # حفظ الملف المرفوع
     temp_input_path = f"/tmp/{uuid.uuid4().hex}_{file.filename}"
     try:
         with open(temp_input_path, "wb") as buffer:
@@ -203,47 +170,33 @@ async def dub_video(background_tasks: BackgroundTasks, file: UploadFile = File(.
             if len(content) > CONFIG["max_file_size"]:
                 raise HTTPException(status_code=413, detail="File too large")
             buffer.write(content)
-        
-        # معالجة الفيديو في خيط منفصل
+
         loop = asyncio.get_event_loop()
-        output_path = await loop.run_in_executor(
-            executor, 
-            translator.process_video, 
-            temp_input_path
-        )
-        
-        # إضافة مهمة تنظيف في الخلفية
+        output_path = await loop.run_in_executor(executor, translator.process_video, temp_input_path)
         background_tasks.add_task(cleanup_files, temp_input_path, output_path)
-        
-        # إرجاع الملف المدبلج
+
         return FileResponse(
             output_path,
             media_type="video/mp4",
             filename=f"dubbed_{file.filename}",
             headers={"Content-Disposition": f"attachment; filename=dubbed_{file.filename}"}
         )
-        
+
     except VideoTranslatorError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
+        logger.error(f"❌ Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 def cleanup_files(*file_paths):
-    """تنظيف الملفات"""
     for file_path in file_paths:
         try:
             if os.path.exists(file_path):
                 os.remove(file_path)
+                logger.info(f"🧹 Removed temp file: {file_path}")
         except Exception as e:
-            logger.warning(f"Failed to cleanup file {file_path}: {str(e)}")
+            logger.warning(f"⚠️ Failed to cleanup {file_path}: {str(e)}")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=port,
-        reload=False,
-        log_level="info"
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
