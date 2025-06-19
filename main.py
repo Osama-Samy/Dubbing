@@ -27,7 +27,7 @@ import uuid
 
 warnings.filterwarnings("ignore", category=UserWarning, module="transformers")
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY", "FMJPLiTea92XmK7ZNqv3CscieRTdQNU5ihZ26RFUrHACpxPKTLiMJQQJ99BFACgEuAYXJ3w3AAAYACOGCMRL")
 AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "italynorth")
