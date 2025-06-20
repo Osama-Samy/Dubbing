@@ -17,7 +17,7 @@ azure-cognitiveservices-speech==1.34.0
 moviepy==1.0.3
 librosa==0.10.1
 soundfile==0.12.1
-noisereduce==3.0.0
+noisereduce==2.0.1
 pydub==0.25.1
 webrtcvad==2.0.10
 
@@ -44,6 +44,7 @@ Pillow==10.1.0
 # Additional utilities
 typing-extensions==4.8.0
 pydantic==2.5.0
+sentencepiece==0.1.99
 
 # For Azure deployment
 gunicorn==21.2.0
