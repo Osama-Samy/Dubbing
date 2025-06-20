@@ -190,9 +190,7 @@ class EnhancedVideoTranslator:
                     y=audio_data,
                     sr=sample_rate,
                     prop_decrease=CONFIG["noise_reduction_strength"],
-                    stationary=False,
-                    n_grad_freq=2,
-                    n_grad_time=4
+                    stationary=False
                 )
 
             logger.info("Performing advanced vocal isolation...")
