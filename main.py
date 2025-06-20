@@ -43,7 +43,7 @@ AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "italynorth")
 
 # Enhanced Configuration
 CONFIG = {
-    "whisper_model": "medium",
+    "whisper_model": "small",
     "translation_model": "Helsinki-NLP/opus-mt-en-ar",
     "arabic_voice": "ar-SA-HamedNeural",
     "max_segment_gap": 0.5,
