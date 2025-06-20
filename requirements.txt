@@ -47,3 +47,4 @@ pydantic==2.5.0
 
 # For Azure deployment
 gunicorn==21.2.0
+
