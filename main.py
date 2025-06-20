@@ -273,8 +273,7 @@ class EnhancedVideoTranslator:
 
             speech_config = speechsdk.SpeechConfig(subscription=AZURE_SPEECH_KEY, region=AZURE_SPEECH_REGION)
             speech_config.speech_synthesis_voice_name = CONFIG["arabic_voice"]
-            speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Wav16Khz16BitMonoPcm)
-
+            speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3)
             synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
             result = synthesizer.speak_text_async(text).get()
 
